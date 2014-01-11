@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Construir Cuil</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="">
+		<meta name="author" content="">
+
+		<!-- Le styles -->
+		<link href="css/bootstrap.css" rel="stylesheet">
+		<link href="css/bootstrap-responsive.css" rel="stylesheet">
+		<script src="js/jquery-1.10.2.min.js"></script>
+		<style type='text/css'>
+		</style>
+	</head>
+	<body onload="run()">
+		<div class="modal">
+			<div class="modal-header">
+				<h3>Construir CUIL</h3>
+			</div>
+			<div class="modal-body text-center">
+				<div class="input-prepend">
+					<span class="add-on">Sexo:</span>
+					<select id="sexo" class="span2">
+						<option value='F'>Femenino</option>
+						<option value='M'>Masculino</option>
+					</select>
+				</div>
+				<div class="input-prepend">
+					<span class="add-on">DNI Nro.:</span>
+					<input class="span2" id="dni" type="text" placeholder="sin puntos" maxlength="8">
+				</div>
+				<div class="alert">
+					<div class="input-prepend">
+						<span class="add-on">CUIL:</span>
+						<input class="span2" id="cuil" type="text" placeholder="" readonly="readonly">
+					</div>
+					<div id='log'></div><div id="dv"></div>
+				</div>
+
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-primary" id="generar">
+					Generar
+				</button>
+			</div>
+		</div>
+		<script>
+			function run() {
+				$("#generar").click(function() {
+					if ($("#dni").val()) {
+						var a_dni = parseInt($("#dni").val());
+						
+						var f0 = 8 - a_dni.toString().length;
+						var ceros = '';
+						for (var f = 0; f < f0; f++) {
+							ceros += '0';
+						}
+						var dni = ceros + a_dni.toString();
+						$("#dni").val(dni);
+						//alert(dni);
+						/*$("#log").html('');
+						$("#dv").html('');
+						var log = '';
+						var a = ($("#sexo").val() == 'F') ? 27 : 20;
+						var dv = 0;
+						var sigue = true;
+						
+						while (sigue && dv <= 10) {
+							var cuil = a + dni + dv;
+							sigue = !validaCuit(cuil);
+							log += dv + '.' + sigue + ':';
+							dv += (sigue) ? 1 : 0;
+						}
+						$("#log").html(log);
+						$("#cuil").val(cuil);*/
+						cuil_cuit( ($("#sexo").val() == 'F') ? 'mujer' : 'hombre', $("#dni").val());
+						$("#cuil").focus();
+						$("#cuil").select();
+					} else {
+						alert('Falta el DNI');
+					}
+
+				});
+			}
+
+			function cuil_cuit(genero, documento) {
+				if ((documento.length != 8) || (isNaN(documento))) {
+					//Muestro un error en caso de no serlo.
+					alert("El número de documento ingresado no es correcto.")
+				} else {
+					//Defino el valor del prefijo.
+					if (genero == 'hombre') {
+						var AB = '20';
+					} else if (genero == 'mujer') {
+						var AB = '27';
+					} else {
+						var AB = '30';
+					}
+
+					/*
+					 Los números (excepto los dos primeros) que le tengo que
+					 multiplicar a la cadena formada por el prefijo y por el
+					 número de documento los tengo almacenados en un arreglo.
+					 */
+					var multiplicadores = new Array('3', '2', '7', '6', '5', '4', '3', '2');
+
+					//Realizo las dos primeras multiplicaciones por separado.
+					var calculo = ((parseInt(AB.charAt(0)) * 5) + (parseInt(AB.charAt(1)) * 4));
+					/*
+					 Recorro el arreglo y el número de documento para
+					 realizar las multiplicaciones.
+					 */
+					for (var i = 0; i < 8; i++) {
+						calculo += (parseInt(documento.charAt(i)) * parseInt(multiplicadores[i]));
+					}
+
+					//Calculo el resto.
+					var resto = (parseInt(calculo)) % 11;
+
+					/*
+					 Llevo a cabo la evaluación de las tres condiciones para
+					 determinar el valor de C y conocer el valor definitivo de
+					 AB.
+					 */
+					if ((genero != 'sociedad') && (resto <= 1)) {
+						if (resto == 0) {
+							var C = '0';
+						} else {
+							if (genero == 'hombre') {
+								var C = '9';
+							} else {
+								var C = '4';
+							}
+						}
+						AB = '23';
+					} else {
+						var C = 11 - resto;
+					}
+
+					//Almaceno el CUIL o CUIT en una variable.
+					var cuil_cuit = AB + "-" + documento + "-" + C;
+
+					//Lo muestro en la ventana del navegador.
+					//alert(cuil_cuit);
+					$("#cuil").val(AB+documento+C);
+				}
+			}
+		</script>
+	</body>
+</html>
